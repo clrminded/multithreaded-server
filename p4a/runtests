@@ -1,0 +1,4 @@
+#!/bin/bash
+base=~/dev/c/cs360/HW2/Assignment2/p4a
+python2.7 $base/test_p4a.py --test-path $base $@ | tee -i runtests.log
+exit $?
