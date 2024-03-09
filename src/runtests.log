@@ -40,15 +40,46 @@ gcc -Wall -o io_helper.o -c io_helper.c
 gcc -Wall -o wserver wserver.o request.o io_helper.o
 gcc -Wall -o wclient.o -c wclient.c
 wclient.c: In function ‘client_send’:
-wclient.c:37:21: warning: ‘host: ’ directive writing 6 bytes into a region of size between 1 and 8192 [-Wformat-overflow=]
-   37 |     sprintf(buf, "%shost: %s\n\r\n", buf, hostname);
+wclient.c:55:5: warning: implicit declaration of function ‘client_print’; did you mean ‘client_send’? [-Wimplicit-function-declaration]
+   55 |     client_print(clientfd);
+      |     ^~~~~~~~~~~~
+      |     client_send
+wclient.c:57:12: warning: ‘return’ with a value, in function returning void [-Wreturn-type]
+   57 |     return NULL;
+      |            ^~~~
+wclient.c:40:6: note: declared here
+   40 | void client_send(void *arg)
+      |      ^~~~~~~~~~~
+wclient.c: At top level:
+wclient.c:63:6: warning: conflicting types for ‘client_print’; have ‘void(int)’
+   63 | void client_print(int fd) {
+      |      ^~~~~~~~~~~~
+wclient.c:55:5: note: previous implicit declaration of ‘client_print’ with type ‘void(int)’
+   55 |     client_print(clientfd);
+      |     ^~~~~~~~~~~~
+wclient.c: In function ‘main’:
+wclient.c:104:17: warning: assignment to ‘int’ from ‘char *’ makes integer from pointer without a cast [-Wint-conversion]
+  104 |     num_threads = argv[4];
+      |                 ^
+wclient.c:115:46: warning: passing argument 3 of ‘pthread_create’ from incompatible pointer type [-Wincompatible-pointer-types]
+  115 |         if(pthread_create(&threads[i], NULL, client_send, args) != 0)
+      |                                              ^~~~~~~~~~~
+      |                                              |
+      |                                              void (*)(void *)
+In file included from wclient.c:25:
+/usr/include/pthread.h:204:36: note: expected ‘void * (*)(void *)’ but argument is of type ‘void (*)(void *)’
+  204 |                            void *(*__start_routine) (void *),
+      |                            ~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+wclient.c: In function ‘client_send’:
+wclient.c:50:21: warning: ‘host: ’ directive writing 6 bytes into a region of size between 1 and 8192 [-Wformat-overflow=]
+   50 |     sprintf(buf, "%shost: %s\n\r\n", buf, args->host);
       |                     ^~~~~~
-wclient.c:37:5: note: ‘sprintf’ output between 10 and 16392 bytes into a destination of size 8192
-   37 |     sprintf(buf, "%shost: %s\n\r\n", buf, hostname);
-      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-wclient.c:37:5: warning: ‘sprintf’ argument 3 overlaps destination object ‘buf’ [-Wrestrict]
-wclient.c:30:10: note: destination object referenced by ‘restrict’-qualified argument 1 was declared here
-   30 |     char buf[MAXBUF];
+wclient.c:50:5: note: ‘sprintf’ output 10 or more bytes (assuming 8201) into a destination of size 8192
+   50 |     sprintf(buf, "%shost: %s\n\r\n", buf, args->host);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+wclient.c:50:5: warning: ‘sprintf’ argument 3 overlaps destination object ‘buf’ [-Wrestrict]
+wclient.c:44:10: note: destination object referenced by ‘restrict’-qualified argument 1 was declared here
+   44 |     char buf[MAXBUF];
       |          ^~~
 gcc -Wall -o wclient wclient.o io_helper.o
 gcc -Wall -o spin.cgi spin.c
@@ -89,26 +120,26 @@ Test basic
 check if the webserver can serve requests
 
 **********************************************************************
-Starting server on port 5672
-/tmp/tmpRYCHCS/p/wserver -p 5672 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8018
-/tmp/tmpRYCHCS/p/wserver -p 8018 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9118
-/tmp/tmpRYCHCS/p/wserver -p 9118 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7783
-/tmp/tmpRYCHCS/p/wserver -p 7783 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7552
-/tmp/tmpRYCHCS/p/wserver -p 7552 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 6739
+/tmp/tmpEPogMn/p/wserver -p 6739 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7587
+/tmp/tmpEPogMn/p/wserver -p 7587 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9712
+/tmp/tmpEPogMn/p/wserver -p 9712 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5941
+/tmp/tmpEPogMn/p/wserver -p 5941 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5702
+/tmp/tmpEPogMn/p/wserver -p 5702 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -125,9 +156,9 @@ invalid port number
 
 **********************************************************************
 Starting server on port 22
-/tmp/tmpRYCHCS/p/wserver -p 22 -t 1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+/tmp/tmpEPogMn/p/wserver -p 22 -t 1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 
 
 test argport PASSED (2 of 2)
@@ -141,10 +172,10 @@ Test argthreads
 invalid number of threads
 
 **********************************************************************
-Starting server on port 9687
-/tmp/tmpRYCHCS/p/wserver -p 9687 -t -1 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 9106
+/tmp/tmpEPogMn/p/wserver -p 9106 -t -1 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 
 
 test argthreads PASSED (2 of 2)
@@ -158,10 +189,10 @@ Test argbuffers
 invalid number of buffers
 
 **********************************************************************
-Starting server on port 8121
-/tmp/tmpRYCHCS/p/wserver -p 8121 -t 1 -b -1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 8135
+/tmp/tmpEPogMn/p/wserver -p 8135 -t 1 -b -1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 
 
 test argbuffers PASSED (2 of 2)
@@ -175,26 +206,26 @@ Test nobusywait
 test to make sure you are not busy-waiting
 
 **********************************************************************
-Starting server on port 9225
-/tmp/tmpRYCHCS/p/wserver -p 9225 -t 10 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7435
-/tmp/tmpRYCHCS/p/wserver -p 7435 -t 10 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9532
-/tmp/tmpRYCHCS/p/wserver -p 9532 -t 10 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8243
-/tmp/tmpRYCHCS/p/wserver -p 8243 -t 10 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5577
-/tmp/tmpRYCHCS/p/wserver -p 5577 -t 10 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 5315
+/tmp/tmpEPogMn/p/wserver -p 5315 -t 10 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9733
+/tmp/tmpEPogMn/p/wserver -p 9733 -t 10 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6867
+/tmp/tmpEPogMn/p/wserver -p 6867 -t 10 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6285
+/tmp/tmpEPogMn/p/wserver -p 6285 -t 10 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9545
+/tmp/tmpEPogMn/p/wserver -p 9545 -t 10 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -210,26 +241,26 @@ Test pool
 check if using a fixed size thread pool
 
 **********************************************************************
-Starting server on port 7196
-/tmp/tmpRYCHCS/p/wserver -p 7196 -t 2 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5964
-/tmp/tmpRYCHCS/p/wserver -p 5964 -t 2 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6696
-/tmp/tmpRYCHCS/p/wserver -p 6696 -t 2 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9426
-/tmp/tmpRYCHCS/p/wserver -p 9426 -t 2 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8031
-/tmp/tmpRYCHCS/p/wserver -p 8031 -t 2 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 7603
+/tmp/tmpEPogMn/p/wserver -p 7603 -t 2 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7767
+/tmp/tmpEPogMn/p/wserver -p 7767 -t 2 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5577
+/tmp/tmpEPogMn/p/wserver -p 5577 -t 2 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5128
+/tmp/tmpEPogMn/p/wserver -p 5128 -t 2 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5141
+/tmp/tmpEPogMn/p/wserver -p 5141 -t 2 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -245,26 +276,26 @@ Test pool2
 check if using a fixed size thread pool
 
 **********************************************************************
-Starting server on port 5989
-/tmp/tmpRYCHCS/p/wserver -p 5989 -t 3 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9762
-/tmp/tmpRYCHCS/p/wserver -p 9762 -t 3 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7555
-/tmp/tmpRYCHCS/p/wserver -p 7555 -t 3 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6955
-/tmp/tmpRYCHCS/p/wserver -p 6955 -t 3 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6529
-/tmp/tmpRYCHCS/p/wserver -p 6529 -t 3 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 5795
+/tmp/tmpEPogMn/p/wserver -p 5795 -t 3 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9841
+/tmp/tmpEPogMn/p/wserver -p 9841 -t 3 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8681
+/tmp/tmpEPogMn/p/wserver -p 8681 -t 3 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8162
+/tmp/tmpEPogMn/p/wserver -p 8162 -t 3 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8151
+/tmp/tmpEPogMn/p/wserver -p 8151 -t 3 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -280,26 +311,26 @@ Test single
 single thread serving many requests
 
 **********************************************************************
-Starting server on port 9778
-/tmp/tmpRYCHCS/p/wserver -p 9778 -t 1 -b 30
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9435
-/tmp/tmpRYCHCS/p/wserver -p 9435 -t 1 -b 30
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8007
-/tmp/tmpRYCHCS/p/wserver -p 8007 -t 1 -b 30
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9311
-/tmp/tmpRYCHCS/p/wserver -p 9311 -t 1 -b 30
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8546
-/tmp/tmpRYCHCS/p/wserver -p 8546 -t 1 -b 30
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 8627
+/tmp/tmpEPogMn/p/wserver -p 8627 -t 1 -b 30
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8971
+/tmp/tmpEPogMn/p/wserver -p 8971 -t 1 -b 30
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5032
+/tmp/tmpEPogMn/p/wserver -p 5032 -t 1 -b 30
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8839
+/tmp/tmpEPogMn/p/wserver -p 8839 -t 1 -b 30
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6940
+/tmp/tmpEPogMn/p/wserver -p 6940 -t 1 -b 30
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -315,26 +346,26 @@ Test light
 light request load
 
 **********************************************************************
-Starting server on port 7466
-/tmp/tmpRYCHCS/p/wserver -p 7466 -t 20 -b 10
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6815
-/tmp/tmpRYCHCS/p/wserver -p 6815 -t 20 -b 10
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8868
-/tmp/tmpRYCHCS/p/wserver -p 8868 -t 20 -b 10
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5116
-/tmp/tmpRYCHCS/p/wserver -p 5116 -t 20 -b 10
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6746
-/tmp/tmpRYCHCS/p/wserver -p 6746 -t 20 -b 10
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 5401
+/tmp/tmpEPogMn/p/wserver -p 5401 -t 20 -b 10
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9840
+/tmp/tmpEPogMn/p/wserver -p 9840 -t 20 -b 10
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7724
+/tmp/tmpEPogMn/p/wserver -p 7724 -t 20 -b 10
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6302
+/tmp/tmpEPogMn/p/wserver -p 6302 -t 20 -b 10
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5627
+/tmp/tmpEPogMn/p/wserver -p 5627 -t 20 -b 10
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -350,26 +381,26 @@ Test light2
 light request load
 
 **********************************************************************
-Starting server on port 5389
-/tmp/tmpRYCHCS/p/wserver -p 5389 -t 16 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9715
-/tmp/tmpRYCHCS/p/wserver -p 9715 -t 16 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5422
-/tmp/tmpRYCHCS/p/wserver -p 5422 -t 16 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5020
-/tmp/tmpRYCHCS/p/wserver -p 5020 -t 16 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6733
-/tmp/tmpRYCHCS/p/wserver -p 6733 -t 16 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 7176
+/tmp/tmpEPogMn/p/wserver -p 7176 -t 16 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6993
+/tmp/tmpEPogMn/p/wserver -p 6993 -t 16 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8609
+/tmp/tmpEPogMn/p/wserver -p 8609 -t 16 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6943
+/tmp/tmpEPogMn/p/wserver -p 6943 -t 16 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8677
+/tmp/tmpEPogMn/p/wserver -p 8677 -t 16 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -385,26 +416,26 @@ Test locks
 many concurrent requests to test locking
 
 **********************************************************************
-Starting server on port 8181
-/tmp/tmpRYCHCS/p/wserver -p 8181 -t 8 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5018
-/tmp/tmpRYCHCS/p/wserver -p 5018 -t 8 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6420
-/tmp/tmpRYCHCS/p/wserver -p 6420 -t 8 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8653
-/tmp/tmpRYCHCS/p/wserver -p 8653 -t 8 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5450
-/tmp/tmpRYCHCS/p/wserver -p 5450 -t 8 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 6788
+/tmp/tmpEPogMn/p/wserver -p 6788 -t 8 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9491
+/tmp/tmpEPogMn/p/wserver -p 9491 -t 8 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7408
+/tmp/tmpEPogMn/p/wserver -p 7408 -t 8 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5515
+/tmp/tmpEPogMn/p/wserver -p 5515 -t 8 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6879
+/tmp/tmpEPogMn/p/wserver -p 6879 -t 8 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -420,26 +451,26 @@ Test locks2
 many concurrent requests to test locking
 
 **********************************************************************
-Starting server on port 6515
-/tmp/tmpRYCHCS/p/wserver -p 6515 -t 32 -b 64
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7452
-/tmp/tmpRYCHCS/p/wserver -p 7452 -t 32 -b 64
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8085
-/tmp/tmpRYCHCS/p/wserver -p 8085 -t 32 -b 64
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7586
-/tmp/tmpRYCHCS/p/wserver -p 7586 -t 32 -b 64
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5801
-/tmp/tmpRYCHCS/p/wserver -p 5801 -t 32 -b 64
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 7531
+/tmp/tmpEPogMn/p/wserver -p 7531 -t 32 -b 64
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5785
+/tmp/tmpEPogMn/p/wserver -p 5785 -t 32 -b 64
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7439
+/tmp/tmpEPogMn/p/wserver -p 7439 -t 32 -b 64
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8194
+/tmp/tmpEPogMn/p/wserver -p 8194 -t 32 -b 64
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8806
+/tmp/tmpEPogMn/p/wserver -p 8806 -t 32 -b 64
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -455,26 +486,26 @@ Test locks3
 many concurrent requests to test locking
 
 **********************************************************************
-Starting server on port 6111
-/tmp/tmpRYCHCS/p/wserver -p 6111 -t 64 -b 128
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9926
-/tmp/tmpRYCHCS/p/wserver -p 9926 -t 64 -b 128
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5131
-/tmp/tmpRYCHCS/p/wserver -p 5131 -t 64 -b 128
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8790
-/tmp/tmpRYCHCS/p/wserver -p 8790 -t 64 -b 128
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8294
-/tmp/tmpRYCHCS/p/wserver -p 8294 -t 64 -b 128
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 8601
+/tmp/tmpEPogMn/p/wserver -p 8601 -t 64 -b 128
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7708
+/tmp/tmpEPogMn/p/wserver -p 7708 -t 64 -b 128
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5272
+/tmp/tmpEPogMn/p/wserver -p 5272 -t 64 -b 128
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7704
+/tmp/tmpEPogMn/p/wserver -p 7704 -t 64 -b 128
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7168
+/tmp/tmpEPogMn/p/wserver -p 7168 -t 64 -b 128
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -490,26 +521,26 @@ Test locks4
 many concurrent requests to test locking
 
 **********************************************************************
-Starting server on port 5193
-/tmp/tmpRYCHCS/p/wserver -p 5193 -t 25 -b 27
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8510
-/tmp/tmpRYCHCS/p/wserver -p 8510 -t 25 -b 27
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8385
-/tmp/tmpRYCHCS/p/wserver -p 8385 -t 25 -b 27
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7450
-/tmp/tmpRYCHCS/p/wserver -p 7450 -t 25 -b 27
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5995
-/tmp/tmpRYCHCS/p/wserver -p 5995 -t 25 -b 27
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 7503
+/tmp/tmpEPogMn/p/wserver -p 7503 -t 25 -b 27
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6432
+/tmp/tmpEPogMn/p/wserver -p 6432 -t 25 -b 27
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8679
+/tmp/tmpEPogMn/p/wserver -p 8679 -t 25 -b 27
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9573
+/tmp/tmpEPogMn/p/wserver -p 9573 -t 25 -b 27
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7303
+/tmp/tmpEPogMn/p/wserver -p 7303 -t 25 -b 27
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -525,26 +556,26 @@ Test equal
 equal buffers and threads
 
 **********************************************************************
-Starting server on port 6780
-/tmp/tmpRYCHCS/p/wserver -p 6780 -t 8 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6222
-/tmp/tmpRYCHCS/p/wserver -p 6222 -t 8 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6514
-/tmp/tmpRYCHCS/p/wserver -p 6514 -t 8 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8070
-/tmp/tmpRYCHCS/p/wserver -p 8070 -t 8 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8929
-/tmp/tmpRYCHCS/p/wserver -p 8929 -t 8 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 6660
+/tmp/tmpEPogMn/p/wserver -p 6660 -t 8 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5055
+/tmp/tmpEPogMn/p/wserver -p 5055 -t 8 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7338
+/tmp/tmpEPogMn/p/wserver -p 7338 -t 8 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9590
+/tmp/tmpEPogMn/p/wserver -p 9590 -t 8 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7024
+/tmp/tmpEPogMn/p/wserver -p 7024 -t 8 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -560,26 +591,26 @@ Test equal2
 equal buffers and threads
 
 **********************************************************************
-Starting server on port 7277
-/tmp/tmpRYCHCS/p/wserver -p 7277 -t 32 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5553
-/tmp/tmpRYCHCS/p/wserver -p 5553 -t 32 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8078
-/tmp/tmpRYCHCS/p/wserver -p 8078 -t 32 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7806
-/tmp/tmpRYCHCS/p/wserver -p 7806 -t 32 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6341
-/tmp/tmpRYCHCS/p/wserver -p 6341 -t 32 -b 32
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 7170
+/tmp/tmpEPogMn/p/wserver -p 7170 -t 32 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5364
+/tmp/tmpEPogMn/p/wserver -p 5364 -t 32 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6116
+/tmp/tmpEPogMn/p/wserver -p 6116 -t 32 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7306
+/tmp/tmpEPogMn/p/wserver -p 7306 -t 32 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7574
+/tmp/tmpEPogMn/p/wserver -p 7574 -t 32 -b 32
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -595,26 +626,26 @@ Test equal3
 equal buffers and threads
 
 **********************************************************************
-Starting server on port 8577
-/tmp/tmpRYCHCS/p/wserver -p 8577 -t 16 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9967
-/tmp/tmpRYCHCS/p/wserver -p 9967 -t 16 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 5172
-/tmp/tmpRYCHCS/p/wserver -p 5172 -t 16 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7835
-/tmp/tmpRYCHCS/p/wserver -p 7835 -t 16 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8460
-/tmp/tmpRYCHCS/p/wserver -p 8460 -t 16 -b 16
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 8380
+/tmp/tmpEPogMn/p/wserver -p 8380 -t 16 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8140
+/tmp/tmpEPogMn/p/wserver -p 8140 -t 16 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5526
+/tmp/tmpEPogMn/p/wserver -p 5526 -t 16 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5412
+/tmp/tmpEPogMn/p/wserver -p 5412 -t 16 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9187
+/tmp/tmpEPogMn/p/wserver -p 9187 -t 16 -b 16
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -630,26 +661,26 @@ Test fewer
 fewer buffers than threads
 
 **********************************************************************
-Starting server on port 9364
-/tmp/tmpRYCHCS/p/wserver -p 9364 -t 16 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6643
-/tmp/tmpRYCHCS/p/wserver -p 6643 -t 16 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6019
-/tmp/tmpRYCHCS/p/wserver -p 6019 -t 16 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7699
-/tmp/tmpRYCHCS/p/wserver -p 7699 -t 16 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8840
-/tmp/tmpRYCHCS/p/wserver -p 8840 -t 16 -b 8
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 8755
+/tmp/tmpEPogMn/p/wserver -p 8755 -t 16 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6874
+/tmp/tmpEPogMn/p/wserver -p 6874 -t 16 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5324
+/tmp/tmpEPogMn/p/wserver -p 5324 -t 16 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6816
+/tmp/tmpEPogMn/p/wserver -p 6816 -t 16 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 6516
+/tmp/tmpEPogMn/p/wserver -p 6516 -t 16 -b 8
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -665,26 +696,26 @@ Test fewer2
 fewer buffers than threads
 
 **********************************************************************
-Starting server on port 5592
-/tmp/tmpRYCHCS/p/wserver -p 5592 -t 32 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6309
-/tmp/tmpRYCHCS/p/wserver -p 6309 -t 32 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 8313
-/tmp/tmpRYCHCS/p/wserver -p 8313 -t 32 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7038
-/tmp/tmpRYCHCS/p/wserver -p 7038 -t 32 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9469
-/tmp/tmpRYCHCS/p/wserver -p 9469 -t 32 -b 1
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 5971
+/tmp/tmpEPogMn/p/wserver -p 5971 -t 32 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9175
+/tmp/tmpEPogMn/p/wserver -p 9175 -t 32 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9279
+/tmp/tmpEPogMn/p/wserver -p 9279 -t 32 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7378
+/tmp/tmpEPogMn/p/wserver -p 7378 -t 32 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7395
+/tmp/tmpEPogMn/p/wserver -p 7395 -t 32 -b 1
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
@@ -700,26 +731,26 @@ Test fewer3
 fewer buffers than threads
 
 **********************************************************************
-Starting server on port 6834
-/tmp/tmpRYCHCS/p/wserver -p 6834 -t 30 -b 3
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9960
-/tmp/tmpRYCHCS/p/wserver -p 9960 -t 30 -b 3
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 9714
-/tmp/tmpRYCHCS/p/wserver -p 9714 -t 30 -b 3
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 6061
-/tmp/tmpRYCHCS/p/wserver -p 6061 -t 30 -b 3
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
-Starting server on port 7091
-/tmp/tmpRYCHCS/p/wserver -p 7091 -t 30 -b 3
-/tmp/tmpRYCHCS/p/wserver: invalid option -- 't'
-usage: wserver [-d basedir] [-p port]
+Starting server on port 5881
+/tmp/tmpEPogMn/p/wserver -p 5881 -t 30 -b 3
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 9901
+/tmp/tmpEPogMn/p/wserver -p 9901 -t 30 -b 3
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 5860
+/tmp/tmpEPogMn/p/wserver -p 5860 -t 30 -b 3
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 8961
+/tmp/tmpEPogMn/p/wserver -p 8961 -t 30 -b 3
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
+Starting server on port 7014
+/tmp/tmpEPogMn/p/wserver -p 7014 -t 30 -b 3
+/tmp/tmpEPogMn/p/wserver: invalid option -- 'b'
+usage: wserver [-d basedir] [-p port] [-t num_threads]
 Failure: Could not start server
 
 
