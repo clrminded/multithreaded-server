@@ -27,34 +27,54 @@
 
 #define MAXBUF (8192)
 
-// define the thread arguments
-typedef struct {
-    char *host;
-    int port;
-    char *filename;
-} ThreadArgs;
+// mutex variable declaration
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+// thread function for sending requests and printing responses
+void *client_thread(void *arg) 
+{
+    char **args = (char **) arg;
+    char *host = args[0];
+    int port = atoi(args[1]);
+    char *filename = args[2];
+
+    int clientfd;
+
+    // open a single connection to the specified host and port
+    if((clientfd = open_client_fd_or_die(host, port)) < 0)
+    {
+        perror("Failed to open client socket");
+        pthread_exit(NULL);
+    }
+
+    // send HTTP request
+    client_send(clientfd, filename);
+
+    // print HTTP response
+    client_print(clientfd);
+
+    // close connection
+    close_or_die(clientfd);
+
+    pthread_exit(NULL);
+}
+
+
 
 //
 // Send an HTTP request for the specified file 
 //
-void client_send(void *arg) 
+void client_send(int fd, char *filename) 
 {
-    ThreadArgs *args = (ThreadArgs *)arg;
-    int clientfd;
     char buf[MAXBUF];
-    
-    clientfd = open_client_fd_or_die(args->host, args->port);
+    char hostname[MAXBUF];
+
+    gethostname_or_die(hostname, MAXBUF);
     
     /* Form and send the HTTP request */
-    sprintf(buf, "GET %s HTTP/1.1\n", args->filename);
-    sprintf(buf, "%shost: %s\n\r\n", buf, args->host);
-    write_or_die(clientfd, buf, strlen(buf));
-
-    // free memory allocated for the arguments
-    free(args); 
-    client_print(clientfd);
-    close_or_die(clientfd);
-    return NULL;
+    sprintf(buf, "GET %s HTTP/1.1\n", filename);
+    sprintf(buf, "%shost: %s\n\r\n", buf, hostname);
+    write_or_die(fd, buf, strlen(buf));
 }
 
 //
@@ -87,44 +107,57 @@ void client_print(int fd) {
     }
 }
 
+
+
 int main(int argc, char *argv[]) 
 {
-    char *filename;
-    int port;
-    int num_threads;
+    char *host, *filename;
+    int port, num_threads;
     
-    if (argc != 5) {
+    if (argc != 6) {
         fprintf(stderr, "Usage: %s <host> <port> <filename> <num_threads>\n", argv[0]);
         exit(1);
     }
     
-    char *host = argv[1];
+    host = argv[1];
     port = atoi(argv[2]);
     filename = argv[3];
-    num_threads = argv[4];
+    num_threads = atoi(argv[4]);
 
+    // initialize mutex
+    if(pthread_mutex_init(&mutex, NULL) != 0) 
+    {
+        perror("Mutex initilization failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // create array of thread IDs
     pthread_t threads[num_threads];
 
     for(int i = 0; i < num_threads; i++) 
     {
-        ThreadArgs *args = malloc(sizeof(ThreadArgs));
-        args->host = host;
-        args->port = port;
-        args->filename = filename;
-
-        if(pthread_create(&threads[i], NULL, client_send, args) != 0)
+        char *args[] = {host, argv[2], filename};
+        if(pthread_create(&threads[i], NULL, client_thread, (void *)args) != 0)
         {
-            perror("pthread_create");
-            exit(1);
+            perror("Thread creation failed");
+            exit(EXIT_FAILURE);
         }
     }
 
     // join the threads
     for(int i = 0; i < num_threads; i++) 
     {
-        pthread_join(threads[i], NULL);
+        if(pthread_join(threads[i], NULL) != 0) 
+        {
+            perror("Thread join failed");
+            exit(EXIT_FAILURE);
+        }
     }
     
     
-    exit(0);
+    // Destroy mutex
+    pthread_mutex_destroy(&mutex);
+
+
+    return 0;
 }
