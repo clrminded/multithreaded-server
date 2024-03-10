@@ -27,24 +27,27 @@
 
 #define MAXBUF (8192)
 
-// mutex variable declaration
+// Mutex variable declaration
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-// thread function for sending requests and printing responses
+// Thread function for sending requests and printing responses
+// @param:
+// - arg: void pointer to an array of strings containing host, port, and filename
+// @return: void pointer
 void *client_thread(void *arg) 
 {
-    char **args = (char **) arg;
-    char *host = args[0];
-    int port = atoi(args[1]);
-    char *filename = args[2];
+    char **args = (char **) arg; // Array of strings containing host, port, and filename
+    char *host = args[0];     // Hostname
+    int port = atoi(args[1]); // Port number
+    char *filename = args[2]; // Filename
 
     int clientfd;
 
-    // open a single connection to the specified host and port
+    // Open a single connection to the specified host and port
     if((clientfd = open_client_fd_or_die(host, port)) < 0)
     {
-        perror("Failed to open client socket");
-        pthread_exit(NULL);
+        perror("Failed to open client socket"); // Print error message if failed to open socket
+        pthread_exit(NULL); // Exit thread
     }
 
     // send HTTP request
@@ -56,108 +59,106 @@ void *client_thread(void *arg)
     // close connection
     close_or_die(clientfd);
 
-    pthread_exit(NULL);
+    pthread_exit(NULL); // Exit thread
 }
-
-
 
 //
 // Send an HTTP request for the specified file 
 //
+// @params:
+// - fd: File descriptor of the socket
+// - filename: Name of the file to request
+// @return: void
 void client_send(int fd, char *filename) 
 {
-    char buf[MAXBUF];
-    char hostname[MAXBUF];
+    char buf[MAXBUF]; // Buffer for storing HTTP request
+    char hostname[MAXBUF]; // Buffer for storing hostname
 
     gethostname_or_die(hostname, MAXBUF);
     
     /* Form and send the HTTP request */
     sprintf(buf, "GET %s HTTP/1.1\n", filename);
     sprintf(buf, "%shost: %s\n\r\n", buf, hostname);
-    write_or_die(fd, buf, strlen(buf));
+    write_or_die(fd, buf, strlen(buf)); // Write HTTP request to socket
 }
 
 //
 // Read the HTTP response and print it out
 //
-void client_print(int fd) {
-    char buf[MAXBUF];  
-    int n;
+// @param: 
+// - fd: File descriptor of the socket
+// @return: void
+void client_print(int fd) 
+{
+    char buf[MAXBUF]; // Buffer for storuing HTTP response
+    int n; // Number of bytes read
     
     // Read and display the HTTP Header 
     n = readline_or_die(fd, buf, MAXBUF);
     while (strcmp(buf, "\r\n") && (n > 0)) 
     {
-        printf("Header: %s", buf);
+        printf("Header: %s", buf); // Print HTTP header
         n = readline_or_die(fd, buf, MAXBUF);
-        
-        // If you want to look for certain HTTP tags... 
-        // int length = 0;
-        //if (sscanf(buf, "Content-Length: %d ", &length) == 1) {
-        //    printf("Length = %d\n", length);
-        //}
     }
     
     // Read and display the HTTP Body 
     n = readline_or_die(fd, buf, MAXBUF);
     while (n > 0) 
     {
-        printf("%s", buf);
+        printf("%s", buf); // Print HTTP body
         n = readline_or_die(fd, buf, MAXBUF);
     }
 }
 
-
-
 int main(int argc, char *argv[]) 
 {
-    char *host, *filename;
-    int port, num_threads;
+    char *host, *filename; // Hostname and filename
+    int port, num_threads; // Port number and number of threads
     
-    if (argc != 6) {
+    if (argc != 6) 
+    {
         fprintf(stderr, "Usage: %s <host> <port> <filename> <num_threads>\n", argv[0]);
         exit(1);
     }
     
-    host = argv[1];
-    port = atoi(argv[2]);
-    filename = argv[3];
-    num_threads = atoi(argv[4]);
+    host = argv[1];             // Set hostname from command-line argument
+    port = atoi(argv[2]);       // Set port number from command-line argument
+    filename = argv[3];         // Set filename from command-line argument
+    num_threads = atoi(argv[4]);// Set number of threads from command-line argument
 
-    // initialize mutex
+    // Initialize mutex
     if(pthread_mutex_init(&mutex, NULL) != 0) 
     {
-        perror("Mutex initilization failed");
+        perror("Mutex initilization failed"); // Print error message if mutex initialization fails
         exit(EXIT_FAILURE);
     }
 
-    // create array of thread IDs
+    // Create array of thread IDs
     pthread_t threads[num_threads];
 
+    // Create multiple threads to send requests
     for(int i = 0; i < num_threads; i++) 
     {
         char *args[] = {host, argv[2], filename};
-        if(pthread_create(&threads[i], NULL, client_thread, (void *)args) != 0)
+        if(pthread_create(&threads[i], NULL, client_thread, (void *)args) != 0) // Arguments to be passed to thread function
         {
-            perror("Thread creation failed");
+            perror("Thread creation failed"); // Print error message if thread creation fails
             exit(EXIT_FAILURE);
         }
     }
 
-    // join the threads
+    // Join the threads
     for(int i = 0; i < num_threads; i++) 
     {
         if(pthread_join(threads[i], NULL) != 0) 
         {
-            perror("Thread join failed");
+            perror("Thread join failed"); // Print error message if thread join fails
             exit(EXIT_FAILURE);
         }
     }
     
-    
     // Destroy mutex
     pthread_mutex_destroy(&mutex);
 
-
-    return 0;
+    return 0; // Exit with success status
 }
